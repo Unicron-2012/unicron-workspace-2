@@ -62,11 +62,11 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser.
+Open http://16.16.198.34:3000 in your browser.
 
 ## 🎯 Vision
 
-AION Workspace aims to go beyond traditional AI chat applications by providing a complete AI-native workspace where users can:
+Unicron Workspace aims to go beyond traditional AI chat applications by providing a complete AI-native workspace where users can:
 
 * Collaborate with AI
 * Generate and manage artifacts
@@ -85,8 +85,7 @@ AION Workspace aims to go beyond traditional AI chat applications by providing a
 * File uploads and knowledge bases
 
 ## 📸 Screenshots
-
-Add screenshots of the application here.
+![Unicron Workspace Screenshot](./img1.png)
 
 ## 🤝 Contributing
 
