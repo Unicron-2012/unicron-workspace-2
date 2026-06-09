@@ -89,11 +89,11 @@ export default function ChatArea({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chatId,
-        userId: user.id,
-        role: "user",
-        content: prompt,
-      }),
+      chatId,
+      role: "user",
+      content: prompt,
+      isFirstMessage: messages.length === 0,
+}),
     });
 
     setPrompt("");

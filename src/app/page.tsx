@@ -9,6 +9,14 @@ export default function Home() {
   const [chats, setChats] = useState<any[]>([]);
 
   useEffect(() => {
+  const user = localStorage.getItem("user");
+
+  if (!user) {
+    window.location.href = "/onboarding";
+  }
+}, []);
+
+  useEffect(() => {
     const user = localStorage.getItem("user");
 
     if (!user) {

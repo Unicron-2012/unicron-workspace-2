@@ -23,7 +23,7 @@ export default function LoginPage() {
   return (
     <div className="h-screen flex items-center justify-center bg-black text-white">
       <div className="w-80 p-6 border rounded-xl space-y-4">
-        <h1 className="text-xl font-bold">Fake Login</h1>
+        <h1 className="text-xl font-bold">Login</h1>
 
         <input
           className="w-full p-2 bg-gray-800 rounded"
