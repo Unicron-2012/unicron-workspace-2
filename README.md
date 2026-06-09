@@ -1,4 +1,4 @@
-# 🚀 AION Workspace
+# 🚀 Unicron Workspace
 
 Unicron Workspace is an AI-powered productivity platform that combines conversational AI, artifact generation, workspace management, and analytics into a unified modern web application.
 
