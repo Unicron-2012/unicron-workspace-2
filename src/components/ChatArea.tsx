@@ -7,101 +7,66 @@ import { Sparkles, Send } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 
-import { suggestedPrompts } from "@/data/prompts";
-
-interface Message {
+type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
-}
+};
 
-export default function ChatArea() {
+export default function ChatArea({
+  chatId,
+  setChats,
+}: any) {
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [chats, setChats] = useState<any[]>([]);
-  const [chatId, setChatId] = useState("");
 
+  // Load chats once
   useEffect(() => {
-  loadChats();
+    loadChats();
+  }, []);
 
-  const existingChatId = localStorage.getItem("chatId");
-
-  if (existingChatId) {
-    console.log("USING EXISTING CHAT:", existingChatId);
-    setChatId(existingChatId);
-  } else {
-    createChat();
-  }
-}, []);
+  // Load messages when chat changes
   useEffect(() => {
-    if (chatId) {
+    if (chatId && typeof chatId === "string") {
       loadMessages(chatId);
     }
   }, [chatId]);
 
-  const createChat = async () => {
+  const loadChats = async () => {
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-      });
+      const res = await fetch("/api/chats");
+      if (!res.ok) return;
 
       const data = await res.json();
-
-      console.log("CHAT RESPONSE:", data);
-
-      localStorage.setItem("chatId", data._id);
-      setChatId(data._id);
-
-      loadChats();
-    } catch (error) {
-      console.error("Failed to create chat:", error);
+      setChats(data);
+    } catch (err) {
+      console.error("Failed to load chats:", err);
     }
   };
 
   const loadMessages = async (id: string) => {
     try {
-      console.log("LOADING MESSAGES FOR:", id);
-
       const res = await fetch(`/api/messages/${id}`);
+      if (!res.ok) return;
+
       const data = await res.json();
 
-      console.log("MESSAGES:", data);
-
-      const formattedMessages: Message[] = data.map((msg: any) => ({
+      const formatted = data.map((msg: any) => ({
         id: msg._id,
         role: msg.role,
         content: msg.content,
         timestamp: new Date(msg.createdAt).toLocaleTimeString(),
       }));
 
-      setMessages(formattedMessages);
-    } catch (error) {
-      console.error("Failed to load messages:", error);
+      setMessages(formatted);
+    } catch (err) {
+      console.error("Failed to load messages:", err);
     }
-  };
-  const loadChats = async () => {
-  try {
-    const res = await fetch("/api/chats");
-
-    const data = await res.json();
-
-    setChats(data);
-  } catch (error) {
-    console.error(error);
-  }
   };
 
   const sendMessage = async () => {
-    console.log("SEND BUTTON CLICKED");
-
-    if (!prompt.trim() || !chatId) {
-      console.log("BLOCKED", {
-        prompt,
-        chatId,
-      });
-      return;
-    }
+    if (!prompt || !chatId) return;
 
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -113,13 +78,9 @@ export default function ChatArea() {
     setMessages((prev) => [...prev, newMessage]);
 
     try {
-      console.log("CALLING /api/message");
-
-      const res = await fetch("/api/message", {
+      await fetch("/api/message", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId,
           role: "user",
@@ -127,13 +88,9 @@ export default function ChatArea() {
         }),
       });
 
-      const data = await res.json();
-
-      console.log("MESSAGE API RESPONSE:", data);
-
       setPrompt("");
-    } catch (error) {
-      console.error("Failed to save message:", error);
+    } catch (err) {
+      console.error("Failed to send message:", err);
     }
   };
 
@@ -141,15 +98,11 @@ export default function ChatArea() {
     <div className="relative flex h-full flex-col">
       <div className="custom-scroll flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-4 py-10">
+
+          {/* Header */}
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="mb-12 text-center"
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2">
@@ -168,56 +121,37 @@ export default function ChatArea() {
             </p>
           </motion.div>
 
-          <div className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {suggestedPrompts.map((prompt) => (
-              <motion.button
-                whileHover={{
-                  y: -5,
-                }}
-                key={prompt.title}
-                className="glass glass-hover rounded-2xl p-5 text-left"
-              >
-                <h3 className="font-semibold">
-                  {prompt.title}
-                </h3>
-
-                <p className="mt-2 text-sm text-slate-400">
-                  {prompt.description}
-                </p>
-              </motion.button>
-            ))}
-          </div>
-
+          {/* Messages */}
           <div className="space-y-5">
-            {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-              />
+            {messages.map((m) => (
+              <MessageBubble key={m.id} message={m} />
             ))}
 
             <TypingIndicator />
           </div>
+
         </div>
       </div>
 
+      {/* Input */}
       <div className="border-t border-white/10 p-4">
         <div className="mx-auto max-w-4xl">
           <div className="glass flex items-center gap-3 rounded-2xl p-3">
+
             <textarea
-              rows={1}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ask Unicron anything..."
-              className="max-h-40 flex-1 resize-none bg-transparent outline-none"
+              className="flex-1 resize-none bg-transparent outline-none"
             />
 
             <button
               onClick={sendMessage}
-              className="rounded-xl bg-cyan-500 px-4 py-3 text-black transition hover:scale-105"
+              className="rounded-xl bg-cyan-500 px-4 py-3 text-black"
             >
               <Send size={18} />
             </button>
+
           </div>
         </div>
       </div>
